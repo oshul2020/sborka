@@ -1,0 +1,31 @@
+{% import 'b_base.html' as base %}
+
+{% macro table(paginate) -%}
+	<table class="table table-sm">
+	<tr>
+		<th>id</th>
+		<th style="width: 150px;">когда</th>
+		<th>кто</th>
+		<th>действие</th>
+		<th>инфо</th>
+	</tr>
+		{% for rec in paginate.items %}
+			<tr>
+				<td>{{ rec.id }}</td>
+				<td>{{ rec.time.strftime('%d-%m-%y %H:%M') }}</td>
+				<td>{{ rec.user }}</td>
+				<td>{{ rec.actions[rec.action] }}</td>
+				<td data-toggle="tooltip" data-placement="top" title="{{ rec.info }}">
+					{% if rec.info | length > 50 %}
+						{{ rec.info[:50]}} ...
+					{% else %}
+						{{ rec.info }}
+					{% endif %}					
+					
+				</td>
+			</tr>
+		{% endfor %}
+	</table>	
+	{{ base.pagination(paginate)}}	
+	
+{%- endmacro %}

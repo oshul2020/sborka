@@ -1,0 +1,20 @@
+{% extends "b_layout.html" %}
+
+{% block main %}
+	<div class="b_mainframe" id="mainFrame">
+		<div class="row">
+			<div class="col">
+				<h3>{{message}}</h3>
+			</div>
+		</div>
+	</div>
+		
+
+	<script>
+		var explode = function(){
+			$(location).prop('href', '/bus');
+		};
+		setTimeout(explode, 2000);
+	</script>
+	
+{% endblock %}	

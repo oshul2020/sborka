@@ -1,0 +1,185 @@
+{% import 'b_base.html' as base %}
+
+{% macro contextMenu(user) -%}
+<div class="dropdown dropleft">
+	<button class="btn btn-sm" type="button" data-toggle="dropdown" 
+		aria-haspopup="true" aria-expanded="false">&#9776;
+	</button>
+	<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+		<a class="dropdown-item" href="#" data-toggle="modal" onclick="dialog(0, 'insert')">новый</a> 
+		<a class="dropdown-item" href="#" data-toggle="modal" onclick="dialog({{user.id}}, 'update')">изменить</a>
+		{% if current_user.status > current_user.ADMIN %}
+			<div class="dropdown-divider"></div>
+			<a class="dropdown-item" href="#" data-toggle="modal" onclick="">баланс</a> 
+		
+		{%endif%}
+	</div>
+</div>
+{%- endmacro %}
+
+{% macro form() -%}
+<form class="form" id="entity_form">
+		<div class="form-group row">
+			<div class="col m-2">
+				<input type="text" class="form-control" id="title" placeholder="имя">
+			</div>
+			<div class="col-3 m-2">			
+				<select class="custom-select" id="status">
+					<option disabled selected>статус...</option>
+					{% for i in range(0, current_user.status) %}
+						<option value="{{i}}">{{current_user.statuses[i]}}</option>
+					{% endfor %}
+				</select>
+			</div>
+		</div>	
+		<div class="form-group row">
+			<div class="col-1 m-2 ml-2 pt-2">
+				<label >баланс</label>
+			</div>	
+			<div class="col-2 m-2">
+				<input type="number" readonly class="form-control text-right" id="account" placeholder="0" min="0">
+			</div>	
+			<div class="col m-2">
+				<input type="password" id="password" class="form-control" placeholder='пароль'>
+			</div>	
+		</div>	
+		<div class="form-group row">
+			<div class="col">
+				<textarea class="form-control" cols="100" rows="2" placeholder="Инфо" id="info"></textarea>
+			</div>	
+			<button type="button" class="btn btn-primary m-2 float-right"
+				id="dialog_button" onclick="send(this, '#Dialog')">
+			</button>
+		</div>		
+</form>
+{% endmacro %}
+
+
+{% macro table(users) -%}
+<table class="table table-sm table-striped">
+	<tr>
+		<th>id</th>
+		<th>имя</th>
+		<th>статус</th>
+		<th>баланс</th>
+		<th>info</th>
+		<th>
+	</tr>
+	{% for user in users %}
+		<tr>
+			<td>{{ user.id }} </td>
+			<td>{{ user.title }} </td>
+			<td>{{ user.statuses[user.status] }} </td>
+			<td>{{ user.account }} </td>
+			<td>{{ user.info }} </td>
+			<td>{{contextMenu(user)}}</td>
+		</tr>
+	{% endfor %}
+</table>	
+{%- endmacro %}
+
+<div id="mainFrame">
+	<div class="row">
+		<div class="col">
+			<div  style="height: 30px;">{{base.flashed()}}</div>
+			{{table(users)}}
+		</div>
+	</div>
+</div>
+	
+{{base.dialog()}}
+
+<div style="display:none">
+	{{form()}}
+</div>	
+	
+<script>
+
+var columns = {};
+
+
+function setUserInfo(res) {
+	$('#title').val(res['title']);
+	$('#account').val(res['account']);
+	$('#status').val(res['status']);
+	if (res['info']) {
+		$('#info').val(res['info']);
+	}	
+}
+
+function GetUserInfo(id) {
+	$.ajax({
+		url: '/bus/jdata',
+		data: {'cmd':'info', 'entity':'User', 'id':id},
+		type: 'POST',
+		dataType: 'json',
+		success: setUserInfo,
+		error: function(error) {
+			console.log(error);
+		}
+	});
+}
+
+function dialog(id, param) {
+	columns["cmd"] = param
+	columns["id"] = id
+		
+	$('#dialog_form').html($('#entity_form').html());
+	
+	if (param == 'insert') {
+		$('#dialog_title').text('добавить пользователя');
+		$('#dialog_button').text('добавить');
+		columns["account"] = 0
+		
+
+	} else if (param == 'update') {
+		$('#dialog_title').text('изменить данные о пользователе');
+		$('#dialog_button').text('изменить');
+		GetUserInfo(id);
+	}
+
+	$('#Dialog').modal('show')
+}
+
+function send(elm, idDialog) {
+	var title = $('#title').val();
+	var password = $('#password').val();
+	var status = $('#status').val();
+	var info = $('#info').val();
+	
+	if (columns['cmd'] == 'insert') {
+		if (!title || !status || !password){
+			return
+		}
+	}
+	
+	if (columns['cmd'] == 'update') {
+		if (!title){
+			return
+		}
+	}
+	
+	if (password){
+		columns['hash'] = md5(password.trim());
+	}
+	if (info) {
+		columns['info'] = info;
+	}
+	columns['title'] = title.trim();
+	columns['status'] = status;
+	
+	$(idDialog).modal('toggle');
+
+	$.ajax({
+        url: '/bus/user',
+        data: columns,
+		type: 'POST',
+        dataType: 'HTML',
+        success: function(res) {
+			$('#mainFrame').html(res);
+        },
+        error: function(error) {
+            console.log(error);			
+        }		
+    });}
+</script>

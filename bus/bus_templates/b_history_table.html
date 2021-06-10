@@ -1,0 +1,30 @@
+{% macro rows(paginate) -%}
+	{% for t in paginate.items %}
+		{% if t.status == t.CANCEL %}
+			<tr class = "table-danger" >
+		{% else %}
+			<tr>
+		{% endif %}
+			<td>{{ t.time.strftime('%d-%m-%y %H:%M') }} </td>
+			<td>№{{ t.route.id }} {{ t.route.title }}
+				{% if t.admin_id %}
+					{% if t.status == t.CANCEL %}
+						| отменил: {{ t.admin }}
+					{% else %}	
+						| добавил: {{ t.admin }}
+					{% endif %}	
+				{% endif %}
+			</td>
+		</tr>
+	{% endfor %}
+{%- endmacro %}
+
+{% macro history(paginate) -%}
+	<table class="table table-sm table-striped" id="history">
+	<tr>
+		<th>время</th>
+		<th>маршрут</th>
+	</tr>
+	{{rows(paginate)}}
+</table>	
+{%- endmacro %}

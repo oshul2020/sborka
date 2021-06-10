@@ -1,0 +1,45 @@
+{% import 'b_base.html' as base %}
+{% import 'b_log_table.html' as table%}
+
+
+{% macro mainFrame(paginate) -%}
+<div class="row m-4">
+	<div class="col">
+		<div id="log_table">{{table.table(paginate)}}</div>
+	</div>
+</div>
+
+{%- endmacro %}
+
+{% block main %}
+<div id="mainFrame">
+	{{mainFrame(paginate)}}
+</div>	
+
+<script> 
+	var data = {'page':1};
+	
+	function ChangePage(page) {
+		data['page'] = page;
+		SendForm();
+	};  
+
+	function SendForm() {
+		
+		$.ajax({
+			url: '/bus/{{log}}',
+			data: data,
+			type: 'POST',
+			dataType: 'HTML',
+			success: function (res) {
+				$('#log_table').html(res);
+			},
+			error: function(error) {
+				console.log(error);			
+			}		
+		});
+	};
+
+</script> 
+
+{% endblock %}

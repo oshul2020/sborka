@@ -1,0 +1,54 @@
+{% extends "b_layout.html" %}
+
+{% macro report(trips) -%}
+	<h5 class="m-2">{{ curr_user.title }}</h5>
+	<h5 class="m-2">кредит: {{ curr_user.account }} поездок</h5>
+	<h5 class="m-2">история (последние 5 поездок)</h5>
+	<table class="table table-sm table-striped">
+	<tr>
+		<th>время</th>
+		<th>маршрут</th>
+	</tr>
+	{% for trip in trips %}
+		<tr>
+			<td>{{ trip.time.strftime('%d-%m-%y %H:%M') }} </td>
+			<td>№{{ trip.route.id }} {{ trip.route.title }} в {{trip.route.start.strftime('%H:%M')}} </td>
+		</tr>
+	{% endfor %}
+</table>	
+{%- endmacro %}
+
+{% macro info(trip) -%}
+	<h5 class="m-2">вы уже зарегистрировались на маршрут "{{trip.route.title}}" в {{trip.time.strftime('%H:%M')}} </h5>
+	<h5 class="m-2">отправление в: {{trip.route.start.strftime('%H:%M')}}, не опаздывайте </h5>
+	<h5 class="m-2">удачной поездки!</h5>
+	<hr class="mt-2 mb-3"/>
+	<h5 class="m-2">хотите отменить поездку - обратитесь к администратору</h5>
+{%- endmacro %}
+
+{% macro cancel(trip) -%}
+	<h5 class="m-2">поездка отменена</h5>
+	<h5 class="m-2">оплатите наличными</h5>
+{%- endmacro %}
+	
+{% block main %}
+<div class="b_mainframe" id="mainFrame">
+	{% if show == 'info' %}
+		{{ info(trip)}}
+		
+	{% elif show == 'cancel' %}	
+		{{ cancel(trip)}}
+	
+	{% elif show == 'report' %}	
+		{{ report(trips)}}
+		
+	{% endif %}	
+</div>
+
+
+	
+<script>
+
+</script>	
+	
+{% endblock %}

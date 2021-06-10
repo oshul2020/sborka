@@ -1,0 +1,33 @@
+{% extends "b_layout.html" %}
+{% import 'b_history_table.html' as table%}
+
+{% block main %}
+<div class="b_mainframe" id="mainFrame">
+	<h5 class="m-2">кредит: {{ curr_user.account }} поездок</h5>
+	{{ table.history(paginate) }}	
+	<div class="m-2 c1" onclick="SendForm()" id="more_data">показать еще</span></div> 
+</div>
+
+<script>
+	var page=1;
+	
+	function SendForm() {
+		page = page + 1;
+		
+		$.ajax({
+			url: '/bus/history',
+			data: {'page': page,},
+			type: 'POST',
+			dataType: 'HTML',
+			success: function (res) {
+				$('#history tr:last').after(res);
+			},
+			error: function(error) {
+				$('#more_data').hide();
+				console.log(error);			
+			}		
+		});
+	};
+</script>
+
+{% endblock %}

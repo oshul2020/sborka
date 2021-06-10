@@ -1,0 +1,175 @@
+{% extends "b_layout.html" %}
+{% import 'b_content_widget.html' as widget %}
+{% import 'b_base.html' as base %}
+
+{% macro ok_dialog() -%}
+<div class="modal fade " id="ok_dialog" tabindex="-1" role="dialog">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<div class="modal-body">
+				<div class="d-flex m-1">
+					<h4 id="ok_message"></h4>
+					<button class="btn btn-danger ml-auto" id="ok_btn">ОК</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{%- endmacro %}
+
+{% macro users_dialog() -%}
+<div class="modal fade " id="users_dialog" tabindex="-1" role="dialog">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<div class="modal-body">
+				<input type="text" class="form-control mb-2" id="filter" placeholder="фильтр" oninput="user_filter(this)">
+				<ul class="list-group list-group-flush mb-2 overflow-auto"  style='height:400px' id="users_list"></ul>
+				<div class="d-flex m-1">
+					<button class="btn btn-secondary ml-auto" onclick="add_users()">добавить</button>
+					<button class="btn btn-secondary ml-2" onclick="exit()">отменить</button>
+				</div>	
+			</div>
+		</div>
+	</div>
+</div>
+{%- endmacro %}
+
+{% block main %}
+<div class="b_mainframe" id="mainFrame">
+	{{ widget.content(route, trips, user)}}
+</div>
+
+{{ ok_dialog() }}
+{{ users_dialog() }}
+{{ base.dialog() }}
+	
+<script>
+	var columns = {};
+	
+	function dialog(msg, user) {
+		var html = String.format('<h5>{0}: {1}</h5>', user, msg);
+		$('#dialog_header').hide();
+		$('#dialog_form').html(html);
+		$('#Dialog').modal('show');	
+	}
+	
+	function cancel(id) {
+		columns['trip_id'] = id;
+		$('#ok_message').html('отменить поездку?');
+		$('#ok_dialog').modal('show');	
+	}
+	
+	function exit() {
+		$('#users_dialog').modal('hide');	
+	}
+	
+	//cancel trip
+	$( "#ok_btn" ).click(function() {
+	  columns['cmd'] = 'cancel';
+	  $('#ok_dialog').modal('toggle');
+	  $.ajax({
+			url: '/bus/route_content',
+			data: columns,
+			type: 'POST',
+			dataType: 'HTML',
+			success: function(res) {
+				$('#mainFrame').html(res);
+			},
+			error: function(error) {
+				console.log(error);			
+			}		
+		});
+	});
+	
+	function add_users() {
+		$('#users_dialog').modal('toggle');
+		columns['cmd'] = 'add';
+		
+		var users = [];
+		var ul = $("#users_list li");
+		ul.each(function(idx, li) {
+			if ($(li).hasClass('list-group-item-primary')) {
+				users.push($(li).attr('value'));
+			}
+		});
+		columns['users'] = users;		
+		$.ajax({
+			url: '/bus/route_content',
+			data: columns,
+			type: 'POST',
+			dataType: 'HTML',
+			success: function(res) {
+				$('#mainFrame').html(res);
+			},
+			error: function(error) {
+				console.log(error);			
+			}		
+		});
+	}
+	
+	function get_users(id) {
+		columns['cmd'] = '!route_pass';
+		columns['route_id'] = id;
+		$.ajax({
+			url: '/bus/jdata',
+			data: columns,
+			type: 'POST',
+			dataType: 'json',
+			success: show_users,
+			error: function(error) {
+				console.log(error);			
+			}		
+		});
+		
+		$('#users_btn').attr("disabled", true);
+		$('#users_dialog').modal('show');	
+	};
+	
+	function show_users(obj) {
+		$('#users_list').html('');
+		$('#filter').val('');
+		
+		$.each(obj, function(key, value){
+			html = String.format("<li class='list-group-item' value={0} onclick='user_select(this)'>{1}</li>",value, key);
+			$('#users_list').append(html);
+		});
+		$('#users_btn').attr("disabled", false);
+	};
+	
+	function user_select(elm) {
+		if ($(elm).hasClass('list-group-item-primary')) {
+			$(elm).removeClass('list-group-item-primary');
+		} else {
+			$(elm).addClass('list-group-item-primary');
+		}
+		
+	};
+	
+	String.format = function() {
+		var s = arguments[0];
+		for (var i = 0; i < arguments.length - 1; i++) {       
+			var reg = new RegExp("\\{" + i + "\\}", "gm");             
+			s = s.replace(reg, arguments[i + 1]);
+		}
+
+		return s;
+	};
+	
+	function user_filter(elm) {
+		var ul = $("#users_list li");
+		var filter_txt = $(elm).val().toUpperCase();
+				
+		ul.each(function(idx, li) {
+			var text = $(li).text().toUpperCase();
+
+			if (text.indexOf(filter_txt) == -1) {
+				$(li).hide();
+			} else {
+				$(li).show();
+			}
+		});
+	};
+
+</script>	
+	
+{% endblock %}

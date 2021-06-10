@@ -1,0 +1,54 @@
+{% macro widget(route) -%}
+
+<div class="col">
+	<div class="route">
+		<div class="number">
+			<div class="id">{{ '%02d'|format(route.id) }}</div>
+		</div>
+		<div class="info">
+			<div class="title">{{ route.title }}</div>
+			<div class="days">{{ route.days | days }}</div>
+		</div>
+		<div class="date">
+			<div class="time time_open">{{ route.open.strftime('%H:%M')}}</div>
+			<div class="time time_start">{{ route.start.strftime('%H:%M')}}</div>
+			<div class="time time_close">{{ route.close.strftime('%H:%M')}}</div>
+		</div>
+	</div>
+</div>
+
+{% endmacro %}
+
+{% macro setup(route, user) -%}
+	<div class="route setup_container" id="setup_{{route.id}}" is_open=0>
+		<form class="form w-100" action="/bus/trip" method="post">
+			<input type="hidden" name="route" value={{route.id}} />
+			<div class="d-flex m-1">
+			<div class="w-100 mr-2">
+				<select class="custom-select mb-1" name="stop" id="stop_{{route.id}}">
+					<option disabled selected value="0">остановка...</option>
+					{% for stop in route.get_stops() %}
+						<option value="{{ stop }}">{{ stop }}</option>
+					{% endfor %}
+				</select>
+				<input type="text" class="form-control" id="msg_{{route.id}}" name="message" placeholder="сообщение" maxlength="50">
+			</div>
+			<div class="ml-auto mh-100" style="width: 130px;">
+		
+				<button type="submit" class="btn btn-secondary w-100" style="height:100%;"><h1 style="font-size: 3rem;">&#128652;</h1></button>
+		
+			</div>	
+			</div>
+			
+		</form>	
+		{% if user.status > user.HIDE %}
+			<hr class="m-1"/>
+			<div class="d-flex m-1">
+				<form class="form w-100" action="/bus/route_content" method="get">
+					<input type="hidden" name="route" value={{route.id}} />
+					<button type="submit" class="btn btn-secondary btn-block">пассажиры</button>
+				</form>	
+			</div>
+		{% endif %}	
+	</div>	
+{%- endmacro %}

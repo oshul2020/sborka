@@ -1,0 +1,50 @@
+{% macro widget(trip, user) -%}
+	{% if trip.status == trip.CANCEL %}
+		<div class="b_cancel w_container">
+	{% else %}
+		<div class="w_container">
+	{% endif %}
+		{% if trip.message %}
+			<div class="w_info c1" onclick="dialog('{{trip.message}}', '{{trip.user}}')"> 
+		{% else %}
+			<div class="w_info"> 
+		{% endif %}	
+			<div class="w_title">{{trip.user.title}}</div>
+			{% if trip.stop %}
+				<div class="w_stop">остановка: {{trip.stop}} 
+					{% if trip.message %}
+						<span class="w_message">&#9888;</span>
+					{% endif %}
+				</div>
+			{% endif %}
+			</div>
+		
+		<div class="w_cmd">	
+			{% if user.status > user.PASS %}		
+				{% if trip.status != trip.CANCEL %}
+					<div class="w_cancel c1" onclick="cancel({{trip.id}})">&#10005;</div>		
+				{% else %}
+					<h6>отменена</h6>
+				{% endif %}	
+			{% endif %}	
+		</div>	
+	</div>
+
+{%- endmacro %}
+
+{% macro content(route, trips, user) -%}
+	<div class="d-flex">
+		<h6 class="m-2">маршрут: {{ route }} (всего: {{ trips | length }})</h6>
+		{% if user.status > user.PASS %}
+			<button type="button" class="btn btn-outline-secondary ml-auto"	onclick="get_users({{route.id}})">&#10133;</button>
+		{% endif %}	
+	</div>
+	<hr/>
+	{% for t in trips %}
+		{{ widget(t, user) }}
+	{% endfor %}
+	<script>
+		$('#account_badge').text({{user.account}});
+	</script>
+{%- endmacro %}
+

@@ -1,0 +1,71 @@
+{% extends "b_admin_layout.html" %}
+
+{% macro l_menu() -%}
+	<div class="list-group" role="tablist">
+		<div class="list-group-item c1" data-toggle="list" onclick="getData('/bus/user')">пользователи</div>
+		<div class="list-group-item c1" data-toggle="list" onclick="getData('/bus/route')">маршруты</div>
+		<div class="list-group-item c1" data-toggle="list" onclick="getData('/bus/log')">журнал</div>
+		{% if user.status >= user.DEV %}
+			<div class="list-group-item c1" data-toggle="list" onclick="getData('/bus/syslog')">log</div>
+		{% endif %}	
+		<div class="list-group-item c1" data-toggle="list" onclick="toMain()">выход</div>
+		
+	</div>
+{%- endmacro %}	
+
+{% macro dataFrame() -%}
+
+{%- endmacro %}
+
+
+
+{% block main %}
+	<style type="text/css">
+		.list-group-item {
+			padding: .5rem 1rem;
+		}
+		.list-group-item.active {
+			background-color: var(--secondary);
+			border-color: var(--secondary);
+		}
+	</style>
+ 	<div class="row">
+		<div class="col-2">
+			{{l_menu()}}
+		</div>
+		<div class="col">
+			<div id="dataFrame">{{dataFrame()}}</div>
+		</div>
+		<div class="col-1"></div>
+	</div>
+
+
+<script> 
+	function flash(html) {
+		$('#flash').append(html)
+		setTimeout(function(){$('#flash').text('');}, 5000);
+	}
+	
+	function getData(path) {
+		$.ajax({
+			url: path,
+			data: {},
+			type: 'GET',
+			dataType: 'HTML',
+			success: function(res) {
+				$('#dataFrame').html(res);
+			},
+			error: function(error) {
+				console.log(error);			
+			}		
+		});
+	};
+	
+	function toMain() {
+		$(location).prop('href', '/bus');
+	};	
+
+</script> 
+
+
+{% endblock %}

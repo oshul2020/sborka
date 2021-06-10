@@ -1,0 +1,67 @@
+{% extends "b_layout.html" %}
+{% import 'b_route_widget.html' as r_widget %}
+
+{% macro show_routes() -%}
+
+	<div class="row">
+		<div class="col">
+			{% if routes | length > 0 %}
+				<h4 class="m-2">выберите маршрут</h4>
+				{% for route in routes %}
+					<div class="row c1" onclick="trip_setup({{route.id}})">
+						{{r_widget.widget(route)}}
+					</div>
+					{{r_widget.setup(route, user)}}
+				{% endfor %}	
+			{% else %}
+				{% if next %}
+					<h4 class="m-2">сейчас маршрутов нет</h4>
+					<h5 class="m-2 mb-4">следующий:</h5>
+					{{r_widget.widget(next)}}
+				{% else %}
+					<h3 class="m-2 text-center">сегодня маршрутов не будет</h3>
+				{% endif %}	
+			{% endif %}
+				
+		</div>
+	</div>
+{%- endmacro %}
+
+{% block main %}
+
+<div class="b_mainframe" id="mainFrame">
+	{% if user.status == user.DEV %}
+		<h5>server time: {{ time.strftime('%H:%M')}}</h5>
+	{% endif %}	
+	{{ show_routes() }}	
+</div>
+
+<script> 
+	var columns = {};
+	var current_setup = 0;
+			
+	function trip_setup(id){
+		var setup_id = "#setup_" + id;
+		var is_open = $(setup_id).attr('is_open');
+	
+		if (is_open == 0) {
+			$(current_setup).hide();
+			$(current_setup).attr('is_open', 0);
+			$('#stop_' + id).val(0);
+			$('#msg_' + id).val('');
+			$(setup_id).show();
+			$(setup_id).attr('is_open', 1);
+			current_setup = setup_id;
+		} else {	
+			$(setup_id).hide();
+			$(setup_id).attr('is_open', 0);
+		}
+	};
+	
+	
+
+	
+</script> 
+
+
+{% endblock %}

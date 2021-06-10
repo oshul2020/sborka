@@ -1,0 +1,294 @@
+{% import 'b_base.html' as base %}
+
+{% macro contextMenu(route) -%}
+<div class="dropdown dropleft">
+	<button class="btn btn-sm" type="button" data-toggle="dropdown" 
+		aria-haspopup="true" aria-expanded="false">&#9776;
+	</button>
+	<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+		<a class="dropdown-item" href="#" data-toggle="modal" onclick="dialog(0, 'insert')">новый маршрут</a> 
+		<a class="dropdown-item" href="#" data-toggle="modal" onclick="dialog({{route.id}}, 'update')">изменить</a>
+	</div>
+</div>
+{%- endmacro %}
+
+{% macro form() -%}
+<form class="form" id="entity_form">
+		<div class="form-group row">
+			<div class="col">
+				<input type="text" class="form-control" id="title" placeholder="название">
+			</div>
+			<div class="col-3">			
+				<select class="custom-select" id="status">
+					<option disabled selected>статус...</option>
+					{% for status in statuses %}
+						<option value="{{loop.index0}}">{{status}}</option>
+					{% endfor %}
+				</select>
+			</div>
+		</div>	
+		<hr class="my-1"/>
+		<div class="form-group row">
+			<div class="col-2">
+				<label>открытие</label>
+				<input type="time" class="form-control" id="open">
+			</div>	
+			<div class="col-2">
+				<label >оправление</label>
+				<input type="time" class="form-control" id="start">
+			</div>	
+			<div class="col-2">
+				<label >закрытие</label>
+				<input type="time" class="form-control" id="close">
+			</div>	
+			<div class="col px-0">
+				<div class="mb-2"><label>по дням</label></div>
+				<div class="form-check form-check-inline">
+				  <input class="form-check-input" type="checkbox" id="day_0">
+				  <label class="form-check-label">Пн</label>
+				</div>
+				<div class="form-check form-check-inline">
+				  <input class="form-check-input" type="checkbox" id="day_1">
+				  <label class="form-check-label">Вт</label>
+				</div>
+				<div class="form-check form-check-inline">
+				  <input class="form-check-input" type="checkbox" id="day_2">
+				  <label class="form-check-label">Ср</label>
+				</div>
+				<div class="form-check form-check-inline">
+				  <input class="form-check-input" type="checkbox" id="day_3">
+				  <label class="form-check-label">Чт</label>
+				</div>
+				<div class="form-check form-check-inline">
+				  <input class="form-check-input" type="checkbox" id="day_4">
+				  <label class="form-check-label">Пт</label>
+				</div>
+				<div class="form-check form-check-inline">
+				  <input class="form-check-input" type="checkbox" id="day_5">
+				  <label class="form-check-label">Сб</label>
+				</div>
+				<div class="form-check form-check-inline">
+				  <input class="form-check-input" type="checkbox" id="day_6">
+				  <label class="form-check-label">Вс</label>
+				</div>
+			</div>
+		</div>
+		<hr class="mb-2"/>	
+			<div class="form-group row">
+				<div class="col">
+					<textarea class="form-control" cols="100" rows="2" placeholder="Остановки" id="stops"></textarea>
+				</div>	
+			</div>		
+		<hr class="mb-2"/>	
+		<div class="form-group row">
+			<div class="col">
+				<input type="text" class="form-control" id="bus" placeholder="модель">
+			</div>	
+			<div class="col">
+				<input type="text" class="form-control" id="driver" placeholder="водитель">
+			</div>	
+			<div class="col">
+				<input type="text" class="form-control" id="contact" placeholder="телефон">
+			</div>	
+	
+		</div>
+		<div class="form-group row">
+			<div class="col">
+				<textarea class="form-control" cols="100" rows="2" placeholder="Инфо" id="info"></textarea>
+			</div>	
+			<button type="button" class="btn btn-primary m-2 float-right"
+				id="dialog_button" onclick="send(this, '#Dialog')">
+			</button>
+		</div>		
+</form>
+{% endmacro %}
+
+
+{% macro table(routes, statuses) -%}
+<table class="table table-sm table-striped">
+	<tr>
+		<th>id</th>
+		<th>название</th>
+		<th class="text-right">открытие</th>
+		<th class="text-right">отправление</th>
+		<th class="text-right">закрытие</th>
+		<th class="text-center">дни</th>
+		<th class="text-center">статус</th>
+		<th>авто</th>
+		<th>водитель</th>
+		<th>контакт</th>
+		<th>инфо</th>
+		<th></th>
+	</tr>
+	{% for r in routes %}
+		<tr>
+			<td>{{ r.id }} </td>
+			<td>{{ r.title }} </td>
+			<td class="text-right">{{ r.open.strftime('%H:%M') }} </td>
+			<td class="text-right">{{ r.start.strftime('%H:%M') }} </td>
+			<td class="text-right">{{ r.close.strftime('%H:%M') }} </td>
+			<td class="text-center">{{ r.days | days }} </td>
+			<td class="text-center">{{ statuses[r.status] }} </td>
+			<td>{{ r.bus }} </td>
+			<td>{{ r.driver }} </td>
+			<td>{{ r.contact }} </td>
+			<td>{{ r.info }} </td>
+			<td>{{contextMenu(r)}}</td>
+		</tr>
+	{% endfor %}
+</table>	
+{%- endmacro %}
+
+<div id="mainFrame">
+	<div class="row">
+		<div class="col">
+			<div  style="height: 30px;">{{base.flashed()}}</div>
+			{{table(routes, statuses)}}
+		</div>
+	</div>
+</div>
+	
+{{base.dialog()}}
+
+<div style="display:none">
+	{{form()}}
+</div>	
+	
+<script>
+var columns = {};
+columns['days'] = 0;
+
+function getDays() {
+	var days = 0;
+	
+	for (var day = 0; day < 7; day++) {
+		var check = Number($('#day_' + day.toString()).prop('checked'));
+		if (check == 1) {
+			days |= (1 << day);
+		} else {
+			days &= ~(1 << day);
+		}
+	}
+	return days;
+};
+
+function setDays(days) {
+	for (var day = 0; day < 7; day++) {
+		var check = 1 & (days >> day);
+		$('#day_' + day.toString()).prop('checked', check);
+	}
+};
+
+function setRouteInfo(res) {
+	console.log(res);
+	$('#title').val(res['title']);
+	$('#status').val(res['status']);
+	$("#open").val(res['open']);
+	$("#start").val(res['start']);
+	$("#close").val(res['close']);
+	
+	$('#stops').val(res['stops']);
+	$("#bus").val(res['bus']);
+	$("#driver").val(res['driver']);
+	$("#contact").val(res['contact']);
+	$('#info').val(res['info']);
+	
+	setDays(res['days'])
+	$('#dialog_button').attr("disabled", false);
+};
+
+function GetRouteInfo(id) {
+	$.ajax({
+		url: '/bus/jdata',
+		data: {'cmd':'info', 'entity':'Route', 'id':id},
+		type: 'POST',
+		dataType: 'json',
+		success: setRouteInfo,
+		error: function(error) {
+			console.log(error);
+		}
+	});
+}
+
+function dialog(id, param) {
+	columns["cmd"] = param
+	columns["id"] = id
+		
+	$('#dialog_form').html($('#entity_form').html());
+	
+	if (param == 'insert') {
+		$('#dialog_title').text('добавить маршрут');
+		$('#dialog_button').text('добавить');
+		
+
+	} else if (param == 'update') {
+		$('#dialog_title').text('изменить маршрут');
+		$('#dialog_button').text('изменить');
+		$('#dialog_button').attr("disabled", true);
+		GetRouteInfo(id);
+	}
+
+	$('#Dialog').modal('show')
+}
+
+function send(elm, idDialog) {
+	var title = $('#title').val();
+	var status = $('#status').val();
+	var info = $('#info').val();
+	var open = $('#open').val();
+	var start = $('#start').val();
+	var close = $('#close').val();
+	var stops = $('#stops').val();
+	var bus = $('#bus').val();
+	var driver = $('#driver').val();
+	var contact = $('#contact').val();
+	var days = getDays();
+	
+	if (columns['cmd'] == 'insert') {
+		if (!title || !status || !open || !start || !close || !stops || days == 0){
+			return
+		}
+	}
+	
+	if (columns['cmd'] == 'update') {
+		if (!title){
+			return
+		}
+	}
+	
+	columns['title'] = title.trim();
+	columns['status'] = Number(status);
+	columns['days'] = days;
+	columns['open'] = open;
+	columns['start'] = start;
+	columns['close'] = close;
+	columns['stops'] = stops;
+		
+	if (bus) {
+		columns['bus'] = bus;
+	}
+	if (driver) {
+		columns['driver'] = driver;
+	}
+	if (contact) {
+		columns['contact'] = contact;
+	}
+	if (info) {
+		columns['info'] = info;
+	}
+			
+	$(idDialog).modal('toggle');
+
+	$.ajax({
+        url: '/bus/route',
+        data: columns,
+		type: 'POST',
+        dataType: 'HTML',
+        success: function(res) {
+			$('#mainFrame').html(res);
+        },
+        error: function(error) {
+            console.log(error);			
+        }		
+    });}
+</script>

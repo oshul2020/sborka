@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+    <head>
+		<meta charset="UTF-8" name="viewport" content="initial-scale=1, width=device-width">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" >
+        <link href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css" rel="stylesheet">
+		<link href="/static/styles.css" rel="stylesheet">
+		<link href="/static/b_styles.css" rel="stylesheet">
+        
+		<script src="https://code.jquery.com/jquery-3.4.1.js" ></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+		<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+		
+		<title>Сборка транспорт</title>
+  
+    </head>
+
+    <body>
+		{% set curr_user = session['bus_user'] %}
+		
+		 <nav class="navbar navbar-expand navbar-dark bg-danger shadow mb-2 " >
+			<a class="navbar-brand" href="#">Sborka.ua</a>
+			{% if curr_user %}
+				<ul class="navbar-nav ml-auto">
+						<h6 class="m-2 text-right text-white">{{ curr_user }} 
+							<span class="badge bg-secondary" id="account_badge">{{ curr_user.account }}</span>
+						</h6>
+						<div class="dropdown dropleft">
+							<button class="btn btn-danger" type="button" data-toggle="dropdown" 
+								aria-haspopup="true" aria-expanded="false"> <span class="navbar-toggler-icon"></span>
+							</button>
+							
+							<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+								<a class="dropdown-item" href="/bus/history">поездки</a>
+								<a class="dropdown-item" href="/bus/payment">оплата</a>
+								<a class="dropdown-item" href="/bus/routes">маршруты</a>
+								<div class="dropdown-divider"></div>								
+								<a class="dropdown-item" href="/bus/password">пароль</a>
+								
+								{% if curr_user.status > curr_user.ADMIN %}
+									<div class="dropdown-divider"></div>
+									<a class="dropdown-item" href="/bus/balance">баланс</a> 
+									{% if session['desktop'] %}
+										<a class="dropdown-item" href="/bus/admin">admin</a> 
+									{% endif %}	
+									<div class="dropdown-divider"></div>	
+									<a class="dropdown-item" href="/bus/password?cmd=temp">временные пароли</a>
+									<a class="dropdown-item" href="/bus/logout">выход</a>
+								{% endif %}
+										
+							</div>
+						</div>
+				</ul>
+			{% endif %}			
+        </nav>
+        <main class="container-fluid p-1">
+         {% block main %}{% endblock %}
+        </main>
+    </body>
+
+</html>
