@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+    <head>
+		<meta charset="UTF-8" name="viewport" content="initial-scale=1, width=device-width">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" >
+ 		<script src="https://code.jquery.com/jquery-3.4.1.js" ></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+		
+		<title>Сборка транспорт</title>
+  
+    </head>
+
+    <body>
+		 <nav class="navbar navbar-expand navbar-dark bg-danger shadow mb-2 " >
+			<a class="navbar-brand" href="#">Sborka.ua</a>
+        </nav>
+        <main class="container-fluid p-1">
+         
+         <div class="row">
+         	<div class="col"></div>
+         	<div class="col text-center">
+         		<h3>измените адрес страницы</h3>
+         		<h3>новый адрес:</h3>
+         		<br>
+         		<a class="mt-4" href="https:\\a.sborka.ua/bus"><h2>https:\\a.sborka.ua/bus</h2></a>	
+         		<br>
+         		<h6><p id="countdown"></p></h6>
+         	</div>	
+         	<div class="col"></div>
+		</div>
+        
+
+
+        </main>
+    
+    <script>
+		var count = 15;
+		  var countdown = setInterval(function(){
+		    $("#countdown").html("переход на новую страницу через " + count + " сек.");
+		    if (count == 0) {
+		      clearInterval(countdown);
+		      window.open('https://a.sborka.ua/bus', "_self");
+
+		    }
+		    count--;
+		  }, 1000);
+    </script>
+
+    </body>
+
+    
+
+</html>

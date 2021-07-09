@@ -113,8 +113,8 @@ class Log(Base):
 	user_id = Column('user_id', Integer, ForeignKey('user'))
 	info = Column('log_info', String)
 	user = relationship('User')
-	WRITEOFF, CANCEL, PAY = 0, 1, 2
-	actions = ('поездка', 'отмена', 'оплата', )
+	WRITEOFF, CANCEL, PAY, ERROR = 0, 1, 2, 3
+	actions = ('поездка', 'отмена', 'оплата', 'ошибка')
 
 	def serialize(self):
 		result = {'id': self.id, 'action': self.action, 'time': self.time, 

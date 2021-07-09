@@ -153,13 +153,14 @@ def b_route_content():
 				t.admin_id = user.id
 				
 				db.add(t)
+				client = db.query(User).filter_by(id=client_id)
 				db.query(User).filter_by(id=client_id).update({'account': User.account + 1})
 					
 				l = Log()
 				l.action = Log.WRITEOFF
 				l.time = now
 				l.user_id = client_id
-				l.info = f'№{t.route.id} {t.route.title} | добавил: {user} | было: {t.user.account}'
+				l.info = f'№{t.route.id} {t.route.title} | добавил: {user} | было: {client.account}'
 				db.add(l)
 				
 				if user.id == client_id:
