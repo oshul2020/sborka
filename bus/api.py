@@ -153,14 +153,15 @@ def b_route_content():
 				t.admin_id = user.id
 				
 				db.add(t)
-				client = db.query(User).filter_by(id=client_id)
-				db.query(User).filter_by(id=client_id).update({'account': User.account + 1})
+				client = db.query(User).get(client_id)
+				before = client.account
+				client.account = User.account + 1
 					
 				l = Log()
 				l.action = Log.WRITEOFF
 				l.time = now
 				l.user_id = client_id
-				l.info = f'№{t.route.id} {t.route.title} | добавил: {user} | было: {client.account}'
+				l.info = f'№{t.route.id} {t.route.title} | добавил: {user} | было: {before}'
 				db.add(l)
 				
 				if user.id == client_id:
@@ -417,21 +418,20 @@ def b_login():
 		hash = hashlib.md5(passw.encode('utf-8')).hexdigest()
 		try:
 			user = db.query(User).filter(User.hash == hash).one()
-
-			agent = re.findall(r'\(.*?\)', request.headers.get('User-Agent'))
+			session['bus_user'] = user
+			session['desktop'] = not request.MOBILE
 			
+			'''
+			agent = re.findall(r'\(.*?\)', request.headers.get('User-Agent'))
 			log = Syslog()
 			log.action = Syslog.LOGIN 
 			log.user_id = user.id
 			log.time = datetime.now()
 			log.info = f'{agent[0]} ip:{request.remote_addr}'
-			
-			session['bus_user'] = user
 			db.add(log)
 			db.commit()
-									
-			session['desktop'] = not request.MOBILE
-							
+			'''
+			
 			return redirect('/bus')	
 					
 		except Exception as e:
