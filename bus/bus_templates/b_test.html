@@ -1,0 +1,28 @@
+{% import 'b_base.html' as base %}
+
+
+
+
+{% macro table(d) -%}
+<table class="table table-sm table-striped">
+	<tr>
+		<th></th>
+	</tr>
+	{% for data in d %}
+		<tr>
+			<td>{{data}}</td>
+		</tr>
+	{% endfor %}
+</table>	
+{%- endmacro %}
+
+<div id="mainFrame">
+	<div class="row">
+		<div class="col">
+			{{table(d)}}
+		</div>
+	</div>
+</div>
+	
+
+

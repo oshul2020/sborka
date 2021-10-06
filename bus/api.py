@@ -87,13 +87,6 @@ def login_required(f):
 		return f(*args, **kwargs)
 	return decorated_function
 
-@app_bus.route('/bus/test', methods=['GET', 'POST'])
-@super_required
-def b_test():
-	
-	return 'only for testing'
-
-
 @app_bus.route('/bus/balance', methods=['GET', 'POST'])
 @super_required
 def b_balance():
@@ -107,13 +100,15 @@ def b_balance():
 			client_id = request.form.get('user', type=int)
 			amount = request.form.get('amount', type=int)
 						
-			client_account = db.query(User).get(client_id).account
-			db.query(User).filter_by(id=client_id).update({'account': User.account - amount})
+			client = db.query(User).get(client_id)
+			before = client.account
+			client.account = User.account - amount
+			
 			l = Log()
 			l.action = Log.PAY
 			l.time = now
 			l.user_id = client_id
-			l.info = f'оплачено: {amount} поездки | кому: {user} | было: {client_account}'
+			l.info = f'оплачено: {amount} | кому: {user} | было: {before}'
 			db.add(l)
 			db.commit()
 			
@@ -161,7 +156,7 @@ def b_route_content():
 				l.action = Log.WRITEOFF
 				l.time = now
 				l.user_id = client_id
-				l.info = f'№{t.route.id} {t.route.title} | добавил: {user} | было: {before}'
+				l.info = f'№{route_id} {route.title} | добавил: {user} | было: {before}'
 				db.add(l)
 				
 				if user.id == client_id:
@@ -421,7 +416,7 @@ def b_login():
 			session['bus_user'] = user
 			session['desktop'] = not request.MOBILE
 			
-			'''
+			
 			agent = re.findall(r'\(.*?\)', request.headers.get('User-Agent'))
 			log = Syslog()
 			log.action = Syslog.LOGIN 
@@ -430,7 +425,7 @@ def b_login():
 			log.info = f'{agent[0]} ip:{request.remote_addr}'
 			db.add(log)
 			db.commit()
-			'''
+			
 			
 			return redirect('/bus')	
 					
@@ -456,13 +451,13 @@ def b_jdata():
 			
 		query = db.query(User)
 		query = query.join(Trip, Trip.user_id==User.id)	
-		query = query.filter(User.status != User.HIDE)
 		query = query.filter(Trip.route_id == route_id)
 		query = query.filter(func.DATE(Trip.time) == datetime.now().date())
 		route_users = query.subquery()
 
 		users = db.query(User).outerjoin(route_users, route_users.c.user_id == User.id)	\
-			.filter(route_users.c.user_id==None).all()
+			.filter(route_users.c.user_id==None) \
+			.filter(User.status != User.HIDE).all()
 		
 		data = {}
 		for user in users:
@@ -513,4 +508,24 @@ def b_routes():
 	return render_template('b_routes.html', 
 		routes= db.query(Route).filter(Route.status == Route.ACTIVE).all())
 			
+	
+@app_bus.route('/bus/test', methods=['GET', 'POST'])
+@super_required
+@desktop_only
+def b_test():
+	query = db.query(User)
+	query = query.join(Trip, Trip.user_id==User.id)	
+	query = query.filter(Trip.route_id == 4)
+	query = query.filter(func.DATE(Trip.time) == datetime.now().date())
+	route_users = query.subquery()
+
+	users = db.query(User).outerjoin(route_users, route_users.c.user_id == User.id)	\
+		.filter(route_users.c.user_id==None) \
+		.filter(User.status != User.HIDE).all()
+	
+	data = []
+	for user in users:
+		data.append(user.title)
+		
+	return render_template('b_test.html', d=data)	
 	

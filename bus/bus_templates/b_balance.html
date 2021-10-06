@@ -24,12 +24,12 @@
 
 {% macro users_list(users) -%}
 	{% for u in users %}
-		<div class="u_container" user="{{u.id}}" amount="{{u.account}}">
+		<div class="u_container" id="container_{{u.id}}">
 		<div class="w_info"> 
-			<div class="u_title">{{u.title}}</div>
+			<div class="u_title" id="title_{{u.id}}">{{u.title}}</div>
 		</div>
-			<div class="w_cmd">	
-				<div class="u_account c1" onclick="dialog(this.closest('.u_container'))">{{u.account}}</div>		
+			<div id="cmd_{{u.id}}" class="w_cmd">	
+				<div id="account_{{u.id}}" class="u_account c1" onclick="dialog(this, {{u.id}})">{{u.account}}</div>		
 			</div>
 		</div>
 		{% if curr_user.id == u.id %}
@@ -63,20 +63,27 @@
 		$('#amount').select(); 
 	})  
 	
-	function dialog(c) {
-		columns['user'] = $(c).attr('user');
-		columns['amount'] = $(c).attr('user');
-		
-		$('#dialog_title').text($(c).children('.w_info').text());
-		$('#amount').val(Math.abs($(c).attr('amount')));
+	function dialog(elm, id) {
+		columns['user'] = id;
+		var account = Number($('#account_'+id).text());
+		$('#dialog_title').text($('#title_'+id).text());
+		$('#amount').val(Math.abs(account));
 		$('#balance_dialog').modal('show');	
 	}
 	
 	function send() {
+		var amount = $('#amount').val();
+		var id = columns['user'];
+		
+		if (!amount || amount==0) {
+			return;
+		}
+		
 		$('#balance_dialog').modal('toggle');
 		columns['cmd'] = 'balance';
-		columns['amount'] = $('#amount').val();
-		
+		columns['amount'] = amount;
+				
+		$('#cmd_'+id).html('<div class="u_account text-secondary">&#9203;</div>');
 		$.ajax({
 			url: '/bus/balance',
 			data: columns,
