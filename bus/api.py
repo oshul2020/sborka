@@ -108,7 +108,7 @@ def b_balance():
 			l.action = Log.PAY
 			l.time = now
 			l.user_id = client_id
-			l.info = f'оплачено: {amount} | кому: {user} | было: {before}'
+			l.info = f'оплачено: {amount} из {before}'
 			db.add(l)
 			db.commit()
 			
