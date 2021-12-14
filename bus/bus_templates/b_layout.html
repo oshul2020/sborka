@@ -17,13 +17,12 @@
     </head>
 
     <body>
-		{% set curr_user = session['bus_user'] %}
-		
+		 {% set curr_user = session['bus_user'] %}
 		 <nav class="navbar navbar-expand navbar-dark bg-danger shadow mb-2 " >
 			<a class="navbar-brand" href="#">Sborka.ua</a>
 			{% if curr_user %}
 				<ul class="navbar-nav ml-auto">
-						<h6 class="m-2 text-right text-white">{{ curr_user }} 
+						<h6 class="m-2 text-right text-white">{{ curr_user.title }} 
 							<span class="badge bg-secondary" id="account_badge">{{ curr_user.account }}</span>
 						</h6>
 						<div class="dropdown dropleft">
@@ -38,7 +37,7 @@
 								<div class="dropdown-divider"></div>								
 								<a class="dropdown-item" href="/bus/password">пароль</a>
 								
-								{% if curr_user.status > curr_user.ADMIN %}
+								{% if curr_user.status > User.ADMIN %}
 									<div class="dropdown-divider"></div>
 									<a class="dropdown-item" href="/bus/balance">баланс</a>
 									{% if session['desktop'] %}

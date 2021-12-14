@@ -6,6 +6,18 @@ import importlib, datetime
 
 Base = declarative_base()
 
+class SessionUser():
+	id=None
+	title=None
+	status=None
+	account=0
+
+	def __init__(self, user):
+		self.id = user.id
+		self.title = repr(user)
+		self.status = user.status
+		self.account = user.account
+
 class Route(Base):
 	__tablename__ = 'route'
 	id = Column('route_id', Integer, primary_key=True)

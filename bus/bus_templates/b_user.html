@@ -8,7 +8,7 @@
 	<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
 		<a class="dropdown-item" href="#" data-toggle="modal" onclick="dialog(0, 'insert')">новый</a> 
 		<a class="dropdown-item" href="#" data-toggle="modal" onclick="dialog({{user.id}}, 'update')">изменить</a>
-		{% if current_user.status > current_user.ADMIN %}
+		{% if current_user.status > User.ADMIN %}
 			<div class="dropdown-divider"></div>
 			<a class="dropdown-item" href="#" data-toggle="modal" onclick="">баланс</a> 
 		
@@ -27,7 +27,7 @@
 				<select class="custom-select" id="status">
 					<option disabled selected>статус...</option>
 					{% for i in range(0, current_user.status) %}
-						<option value="{{i}}">{{current_user.statuses[i]}}</option>
+						<option value="{{i}}">{{User.statuses[i]}}</option>
 					{% endfor %}
 				</select>
 			</div>

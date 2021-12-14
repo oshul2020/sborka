@@ -9,12 +9,13 @@
 				<h5 class="mb-2" id="dialog_title"></h5>
 				<hr/>
 				<div class="row m-1">
-					<label class="text-right py-2 mr-2">оплатить</label>	
+					<label class="text-right py-2 mr-2">списать</label>	
 					<input class="form-control text-right mr-2 w-25"  type="number" id="amount" min="1" max="100">
-					<label class="text-left py-2">поездок</label>	
+					<label class="text-left py-2">поездок</label>
+					<input type="hidden" id="user" name="user_id">	
 				</div>	
 				<div class="d-flex m-1">
-					<button class="btn btn-secondary w-25 ml-auto" onclick="send()">ОК</button>
+					<button id="dialog_btn" class="btn btn-danger w-25 ml-auto" onclick="set_balance()">ОК</button>
 				</div>
 			</div>
 		</div>
@@ -29,10 +30,7 @@
 			<div class="u_title" id="title_{{u.id}}">{{u.title}}</div>
 		</div>
 			<div id="cmd_{{u.id}}" class="w_cmd">	
-				<!--
-				<div class="u_account c1" onclick="dialog(this, {{u.id}}, {{u.account}})">{{u.account}}</div>		
-				-->
-				<div class="u_account">{{u.account}}</div>		
+				<div class="u_account c1" onclick="update_balance({{u.id}})">{{u.account}}</div>		
 			</div>
 		</div>
 		{% if curr_user.id == u.id %}
@@ -58,47 +56,58 @@
 {{ balance_dialog() }}
 	
 <script>
-	var columns = {};
 	
-	
+	function set_balance() {
+		var id = $("#user").attr("user_id");
+		var amount = $('#amount').val();
+
+		$('#balance_dialog').modal('toggle');
+		$.ajax({
+			url: '/bus/balance',
+			data: {'cmd':'set', 'id':id, 'amount':amount},
+			type: 'POST',
+			dataType: 'json',
+			success: function(res){
+				console.log(res);
+				var id = res["id"];
+				var account = res["account"];
+				$('#cmd_'+id).html('<div class="u_account c1" onclick="update_balance('+id+')">'+account+'</div>')	
+			},
+			error: function(error) {
+				alert(error.responseText);
+			}
+		});
+	}
+
 	$('#balance_dialog').on('shown.bs.modal', function () {
 		$('#amount').focus();
 		$('#amount').select(); 
 	})  
-	
-	function dialog(elm, id, account) {
-		columns['user'] = id;
-		$('#dialog_title').text($('#title_'+id).text());
-		$('#amount').val(account);
+
+	function show_dialog(res) {
+		var amount = res["account"];
+		$("#user").attr("user_id",res["id"]);
+		$('#dialog_title').text(res["title"]);
+		$('#amount').val(amount);
 		$('#balance_dialog').modal('show');	
 	}
-	
-	function send() {
-		var amount = $('#amount').val();
-		var id = columns['user'];
-		
-		if (!amount || amount==0) {
-			return;
-		}
-		
-		$('#balance_dialog').modal('toggle');
-		columns['cmd'] = 'balance';
-		columns['amount'] = amount;
-				
+
+	function update_balance(id) {
 		$('#cmd_'+id).html('<div class="u_account text-secondary">&#9203;</div>');
 		$.ajax({
 			url: '/bus/balance',
-			data: columns,
+			data: {'cmd':'get', 'id':id},
 			type: 'POST',
-			dataType: 'HTML',
-			success: function(res) {
-				$('#list_container').html(res);
-			},
+			dataType: 'json',
+			success: show_dialog,
 			error: function(error) {
-				console.log(error);			
-			}		
+				console.log(error);
+			}
 		});
+
 	}
+
+
 	
 	function user_filter(elm) {
 		all = $(".u_container")
